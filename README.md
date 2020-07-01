@@ -12,8 +12,8 @@ An example of this could be to play an obnoxious audio file as an alarm.
 Usage: `pidtimer.exe <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTIONAL ARGS] ...`
 
 OPTIONAL ARGUMENTS:
- - `-k, --kill   <PID>`
- - `-o, --open   <file path + cmd args>`  (Use escape characters for quotes!)
+ - `-k, --kill`   `<PID>`
+ - `-o, --open`   `<file path + cmd args>`  (Use escape characters for quotes!)
 
 USAGE EXAMPLES:
  - `pidtimer.exe 3:07:42:13.962 --kill 3479`
