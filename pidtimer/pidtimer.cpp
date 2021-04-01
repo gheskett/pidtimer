@@ -16,6 +16,7 @@
  * OPTIONAL ARGUMENTS:
  *		-k, --kill	<PID>
  *		-o, --open	<file path + cmd args>  (Use escape characters for quotes!)
+ *		-r, --remind                        (Open pidtimer.jpg or pidtimer.png)
  * 
  * USAGE EXAMPLES:
  *  pidtimer.exe 3:07:42:13.962 --kill 3479
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
 	uint64_t duration; // Time to wait before execution of arguments
 	vector<Argument> arguments; // list of arguments to be executed once timer expires
 
-	if (argc < 4 || argc % 2 != 0) {
+	if (argc < 3) {
 		// Invalid argument syntax
 		printf(defineHelp(argv[0]).c_str());
 		return 1;
@@ -73,6 +74,12 @@ int main(int argc, char **argv)
 	for (int i = 2; i < argc; i += 2) {
 		// kill PID argument
 		if (!strcmp(argv[i], "-k") || !strcmp(argv[i], "--kill")) {
+			if (argc == i + 1) {
+				// Invalid argument syntax
+				printf(defineHelp(argv[0]).c_str());
+				return 1;
+			}
+
 			try {
 				if (!isValidPID(argv[i + 1])) {
 					printf("WARNING: Invalid PID value: %s\n", argv[i + 1]);
@@ -96,6 +103,12 @@ int main(int argc, char **argv)
 		}
 		// Open new process argument
 		else if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--open")) {
+			if (argc == i + 1) {
+				// Invalid argument syntax
+				printf(defineHelp(argv[0]).c_str());
+				return 1;
+			}
+
 			string filepath = processFirst(argv[i + 1]);
 			FILE* file;
 			fopen_s(&file, filepath.c_str(), "r");
@@ -106,6 +119,39 @@ int main(int argc, char **argv)
 			fclose(file);
 
 			arguments.emplace_back(false, filepath.c_str(), argv[i + 1]);
+		}
+		// Open pidtimer.jpg or pidtimer.png; used to serve essentially as an image reminder shortcut
+		else if (!strcmp(argv[i], "-r") || !strcmp(argv[i], "--remind")) {
+
+			char buf[MAX_PATH];
+			GetModuleFileNameA(NULL, buf, MAX_PATH);
+
+			string filepath = buf;
+			size_t ext = filepath.find_last_of(".");
+			if (ext != string::npos) {
+				filepath = filepath.substr(0, ext);
+			}
+
+			string filepathImg = filepath + ".jpg";
+
+			FILE* file;
+			fopen_s(&file, filepathImg.c_str(), "r");
+			if (!file) {
+				filepathImg = filepath + ".png";
+				fopen_s(&file, filepathImg.c_str(), "r");
+				if (!file) {
+					printf("WARNING: Cannot find/open file: %s\n", filepath.c_str());
+					i--;
+					continue;
+				}
+			}
+			fclose(file);
+
+			filepathImg = "\"" + filepathImg + "\"";
+
+			arguments.emplace_back(false, filepathImg.c_str(), filepathImg.c_str());
+
+			i--;
 		}
 		else {
 			// Invalid argument syntax
@@ -171,7 +217,8 @@ string defineHelp(const char *arg) {
 	string s2 = " <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTIONAL ARGS] ...\n\n"
 		"OPTIONAL ARGUMENTS:\n"
 		"  -k, --kill   <PID>\n"
-		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n\nUSAGE EXAMPLES:\n  ";
+		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n"
+		"  -r, --remind                         (Open pidtimer.jpg or pidtimer.png)\n\nUSAGE EXAMPLES:\n  ";
 	string s3 = " 3:07:42:13.962 --kill 3479\n  ";
 	string s4 = " 420:69 -k 42069 -o \"\\\"funky music.mp3\\\"\" -k 19573\n  ";
 	string s5 = " 1:30:00 -o \"send_message.exe \\\"This is a message string!\\\"\"\n";
@@ -259,7 +306,7 @@ int64_t calcDuration(const char *arg) {
 	return days + hours + minutes + seconds + milliseconds;
 }
 
-// Reverse calculation of time duration in milliseconds (uint64_t to string)
+// Reverse calculation of time duration in seconds (uint64_t to string)
 string calcDurStr(uint64_t duration) {
 	string ret = "";
 	duration /= 1000;

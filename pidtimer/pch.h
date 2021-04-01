@@ -32,7 +32,7 @@ public:
 std::string defineHelp(const char*); // Sets help text
 bool isValidPID(const char*); // Checks if PID is valid
 int64_t calcDuration(const char*); // Calculates time duration to use in milliseconds (string to int64_t)
-std::string calcDurStr(uint64_t duration); // Reverse calculation of time duration in milliseconds (uint64_t to string)
+std::string calcDurStr(uint64_t duration); // Reverse calculation of time duration in seconds (uint64_t to string)
 int doPIDStuffs(uint16_t pid); // Actual brains of the PID termination work
 int newProcess(std::string filename, std::string cmdline); // Opens new process when called
 std::string processFirst(const char* in); // Parse escape characters from first command line arg
