@@ -14,6 +14,7 @@ Usage: `pidtimer.exe <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTION
 OPTIONAL ARGUMENTS:
  - `-k, --kill`   `<PID>`
  - `-o, --open`   `<file path + cmd args>`  (Use escape characters for quotes!)
+ - `-r, --remind`  (Open pidtimer.jpg or pidtimer.png)
 
 USAGE EXAMPLES:
  - `pidtimer.exe 3:07:42:13.962 --kill 3479`
