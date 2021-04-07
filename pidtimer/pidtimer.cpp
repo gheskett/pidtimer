@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 				break;
 			}
 			ftime(&t_current);
-			diff = (uint64_t)(1000.0 * (t_current.time - t_start.time) + (t_current.millitm - t_start.millitm));
+			diff = (uint64_t)(1000.0 * (t_current.time - t_start.time) + ((short) t_current.millitm - (short) t_start.millitm));
 			printf("\x1B[2K\rTime remaining: %s", calcDurStr(duration - total).c_str());
 			Sleep((DWORD) (total - diff + 1000));
 			total += 1000;
