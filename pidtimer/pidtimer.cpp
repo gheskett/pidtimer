@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 {
 	system(" ");  // Enable VT100 support
 
-	uint64_t duration; // Time to wait before execution of arguments
+	int64_t duration; // Time to wait before execution of arguments
 	vector<Argument> arguments; // list of arguments to be executed once timer expires
 
 	if (argc < 3) {
@@ -177,15 +177,15 @@ int main(int argc, char **argv)
 		Sleep((DWORD) (duration % 1000));
 		ftime(&t_start);
 		duration -= duration % 1000;
-		uint64_t diff;
-		uint64_t total = 0;
+		int64_t diff;
+		int64_t total = 0;
 		while (true) {
 			if (total >= duration) {
 				printf("\x1B[2K\rTime remaining: %s\n\n", calcDurStr(duration - total).c_str());
 				break;
 			}
 			ftime(&t_current);
-			diff = (uint64_t)(1000.0 * (t_current.time - t_start.time) + ((short) t_current.millitm - (short) t_start.millitm));
+			diff = (int64_t)(1000.0 * (t_current.time - t_start.time) + ((short) t_current.millitm - (short) t_start.millitm));
 			printf("\x1B[2K\rTime remaining: %s", calcDurStr(duration - total).c_str());
 			Sleep((DWORD) (total - diff + 1000));
 			total += 1000;
@@ -306,8 +306,8 @@ int64_t calcDuration(const char *arg) {
 	return days + hours + minutes + seconds + milliseconds;
 }
 
-// Reverse calculation of time duration in seconds (uint64_t to string)
-string calcDurStr(uint64_t duration) {
+// Reverse calculation of time duration in milliseconds (int64_t to string)
+string calcDurStr(int64_t duration) {
 	string ret = "";
 	duration /= 1000;
 	int64_t days = duration / 86400;
