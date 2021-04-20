@@ -133,15 +133,18 @@ int main(int argc, char **argv)
 		duration -= duration % 1000;
 		int64_t diff;
 		int64_t total = 0;
+		int64_t sleepTime;
 		while (true) {
 			if (total >= duration) {
 				printf("\x1B[2K\rTime remaining: %s\n\n", calcDurStr(duration - total).c_str());
 				break;
 			}
 			ftime(&t_current);
-			diff = (int64_t)(1000.0 * (t_current.time - t_start.time) + ((short) t_current.millitm - (short) t_start.millitm));
+			diff = (int64_t)(1000.0 * (int64_t) (t_current.time - t_start.time) + ((short) t_current.millitm - (short) t_start.millitm));
 			printf("\x1B[2K\rTime remaining: %s", calcDurStr(duration - total).c_str());
-			Sleep((DWORD) (total - diff + 1000));
+			sleepTime = total - diff + 1000;
+			if (sleepTime > 0)
+				Sleep((DWORD) sleepTime);
 			total += 1000;
 		}
 	}
