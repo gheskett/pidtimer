@@ -228,7 +228,7 @@ string defineHelp(const char *arg) {
 		"OPTIONAL ARGUMENTS:\n"
 		"  -k, --kill   <PID>                   (Gracefully terminate a process)\n"
 		"  -f, --force  <PID>                   (Force close a process)\n"
-		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n";
+		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n"
 		"  -r, --remind                         (Open pidtimer.jpg or pidtimer.png)\n\nUSAGE EXAMPLES:\n  ";
 	string s3 = " 3:07:42:13.962 --kill 3479\n  ";
 	string s4 = " 420:69 -k 42069 -o \"\\\"funky music.mp3\\\"\" -f 19573\n  ";
