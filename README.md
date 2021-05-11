@@ -12,10 +12,11 @@ An example of this could be to play an obnoxious audio file as an alarm.
 Usage: `pidtimer.exe <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTIONAL ARGS] ...`
 
 OPTIONAL ARGUMENTS:
- - `-k, --kill`   `<PID>`
+ - `-k, --kill`	  `<PID>`                   (Gracefully terminate a process)
+ - `-f, --force`  `<PID>`                   (Force close a process)
  - `-o, --open`   `<file path + cmd args>`  (Use escape characters for quotes!)
 
 USAGE EXAMPLES:
  - `pidtimer.exe 3:07:42:13.962 --kill 3479`
- - `pidtimer.exe 420:69 -k 42069 -o "\"funky music.mp3\"" -k 19573`
+ - `pidtimer.exe 420:69 -k 42069 -o "\"funky music.mp3\"" -f 19573`
  - `pidtimer.exe 1:30:00 -o "send_message.exe \"This is a message string!\""`
