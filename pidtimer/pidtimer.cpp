@@ -14,13 +14,14 @@
  * Usage: pidtimer.exe <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTIONAL ARGS] ...
  * 
  * OPTIONAL ARGUMENTS:
- *		-k, --kill	<PID>
- *		-o, --open	<file path + cmd args>  (Use escape characters for quotes!)
- *		-r, --remind                        (Open pidtimer.jpg or pidtimer.png)
+ *		-k, --kill	 <PID>                   (Gracefully terminate a process)
+ *		-f, --force	 <PID>                   (Force close a process)
+ *		-o, --open	 <file path + cmd args>  (Use escape characters for quotes!)
+ *		-r, --remind                         (Open pidtimer.jpg or pidtimer.png)
  * 
  * USAGE EXAMPLES:
  *  pidtimer.exe 3:07:42:13.962 --kill 3479
- *  pidtimer.exe 420:69 -k 42069 -o "\"funky music.mp3\"" -k 19573
+ *  pidtimer.exe 420:69 -k 42069 -o "\"funky music.mp3\"" -f 19573
  *  pidtimer.exe 1:30:00 -o "send_message.exe \"This is a message string!\""
  * 
  */
@@ -34,6 +35,7 @@ Argument::Argument(bool a, const char* b, const char *c) {
 	isPID = a;
 	if (isPID) {
 		pid = (uint16_t) atoi(b);
+		force = (atoi(c) != 0);
 	}
 	else {
 		filepath = b;
@@ -73,7 +75,7 @@ int main(int argc, char **argv)
 
 	for (int i = 2; i < argc; i += 2) {
 		// kill PID argument
-		if (!strcmp(argv[i], "-k") || !strcmp(argv[i], "--kill")) {
+		if (!strcmp(argv[i], "-k") || !strcmp(argv[i], "--kill") || !strcmp(argv[i], "-f") || !strcmp(argv[i], "--force")) {
 			if (argc == i + 1) {
 				// Invalid argument syntax
 				printf(defineHelp(argv[0]).c_str());
@@ -94,7 +96,12 @@ int main(int argc, char **argv)
 				}
 				CloseHandle(process);
 
-				arguments.emplace_back(true, argv[i + 1], "");
+				if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "--force")) {
+					arguments.emplace_back(true, argv[i + 1], "1");
+				}
+				else {
+					arguments.emplace_back(true, argv[i + 1], "0");
+				}
 			}
 			catch(exception) {
 				printf("WARNING: Unable to parse PID of argument %d!\n", i + 2);
@@ -201,7 +208,7 @@ int main(int argc, char **argv)
 	// Do what?
 	for (Argument& i : arguments) {
 		if (i.isPID) {
-			doPIDStuffs(i.pid);
+			doPIDStuffs(i.pid, i.force);
 		}
 		else {
 			newProcess(i.filepath, i.cmdline);
@@ -219,11 +226,12 @@ string defineHelp(const char *arg) {
 	string s1 = "\nUsage: ";
 	string s2 = " <[days]:[hours]:[minutes]:[seconds].[milliseconds]> [OPTIONAL ARGS] ...\n\n"
 		"OPTIONAL ARGUMENTS:\n"
-		"  -k, --kill   <PID>\n"
-		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n"
+		"  -k, --kill   <PID>                   (Gracefully terminate a process)\n"
+		"  -f, --force  <PID>                   (Force close a process)\n"
+		"  -o, --open   <file path + cmd args>  (Use escape characters for quotes!)\n";
 		"  -r, --remind                         (Open pidtimer.jpg or pidtimer.png)\n\nUSAGE EXAMPLES:\n  ";
 	string s3 = " 3:07:42:13.962 --kill 3479\n  ";
-	string s4 = " 420:69 -k 42069 -o \"\\\"funky music.mp3\\\"\" -k 19573\n  ";
+	string s4 = " 420:69 -k 42069 -o \"\\\"funky music.mp3\\\"\" -f 19573\n  ";
 	string s5 = " 1:30:00 -o \"send_message.exe \\\"This is a message string!\\\"\"\n";
 
 	return s1 + str + s2 + str + s3 + str + s4 + str + s5;
@@ -336,7 +344,7 @@ string calcDurStr(int64_t duration) {
 }
 
 // Actual brains of the PID termination work
-int doPIDStuffs(uint16_t pid) {
+int doPIDStuffs(uint16_t pid, bool forceClose) {
 	HANDLE process = OpenProcess(PROCESS_TERMINATE, true, pid);
 	if (!process) {
 		printf("PID %d: Process already closed!\n", pid);
@@ -345,15 +353,23 @@ int doPIDStuffs(uint16_t pid) {
 	}
 
 	int ret = 0;
-	if (!TerminateProcess(process, 1)) {
-		printf("PID %d: Process already closed!\n", pid);
-		ret = 2;
+	if (forceClose) {
+		if (!TerminateProcess(process, 1)) {
+			printf("PID %d: Process already closed!\n", pid);
+			ret = 2;
+		}
+		else {
+			printf("PID %d: Process terminated successfully!\n", pid);
+		}
+		CloseHandle(process);
+		return ret;
 	}
-	else {
-		printf("PID %d: Process terminated successfully!\n", pid);
-	}
+
 	CloseHandle(process);
-	return ret;
+
+	string sysCommand = "TASKKILL /PID " + to_string(pid);
+
+	return system(sysCommand.c_str());
 }
 
 // Opens new process when called
